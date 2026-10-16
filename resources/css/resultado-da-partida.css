@@ -1,0 +1,29 @@
+/*
+ * Modal de resultado da partida no celular (abaixo de md), em três regiões: cabeçalho e botão
+ * sempre à vista, só a classificação e as rodadas rolam. A página de fundo não rola enquanto a
+ * modal está aberta, e a altura desconta as safe areas (o viewport usa viewport-fit=cover).
+ * O desktop usa só as classes do Tailwind na própria <dialog>.
+ */
+@media (width < 48rem) {
+    .resultado-partida {
+        max-width: 28rem;
+        max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem));
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .resultado-partida[open],
+    .resultado-partida__celular {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .resultado-partida__celular {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    html:has(.resultado-partida[open]) {
+        overflow: hidden;
+    }
+}

@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+@import './mesa-de-jogo.css';
+@import './labirinto.css';
+@import './navegacao-mobile.css';
+@import './resultado-da-partida.css';
+@import './inicio-desktop.css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Paleta v1 do RANÇO. Função de cada cor e contraste em docs/identidade-visual.md. */
+    --color-coal: #20201F;   /* grafite: texto principal, áreas escuras */
+    --color-cream: #F7F3EC;  /* marfim: fundo principal */
+    --color-sand: #EAE2D5;   /* areia: fundos de apoio e voz do RANÇO */
+    --color-coral: #FF684D;  /* coral: assinatura; nunca como texto sobre fundo claro */
+    --color-muted: #706A62;  /* cinza quente: texto secundário */
+    --color-danger: #BD392B; /* vermelho queimado: só para erro real */
+
+    --color-zinc-50: #fafafa;
+    --color-zinc-100: #f5f5f5;
+    --color-zinc-200: #e5e5e5;
+    --color-zinc-300: #d4d4d4;
+    --color-zinc-400: #a3a3a3;
+    --color-zinc-500: #737373;
+    --color-zinc-600: #525252;
+    --color-zinc-700: #404040;
+    --color-zinc-800: #262626;
+    --color-zinc-900: #171717;
+    --color-zinc-950: #0a0a0a;
+
+    /* Componentes Flux: botão principal coral com texto grafite (contraste 5,7). */
+    --color-accent: var(--color-coral);
+    --color-accent-content: var(--color-coal);
+    --color-accent-foreground: var(--color-coal);
+}
+
+@layer theme {
+    .dark {
+        --color-accent: var(--color-white);
+        --color-accent-content: var(--color-white);
+        --color-accent-foreground: var(--color-neutral-800);
+    }
+}
+
+@layer base {
+
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+[data-flux-field]:not(ui-radio, ui-checkbox) {
+    @apply grid gap-2;
+}
+
+[data-flux-label] {
+    @apply  !mb-0 !leading-tight;
+}
+
+input:focus[data-flux-control],
+textarea:focus[data-flux-control],
+select:focus[data-flux-control] {
+    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+}
+
+/* \[:where(&)\]:size-4 {
+    @apply size-4;
+} */
+
+/* O navlist do Flux usa zinco claro. No marfim, Perfil e Segurança somem. */
+[data-flux-navlist-item] {
+    color: var(--color-coal);
+}
+
+[data-flux-navlist-item][data-current] {
+    background-color: var(--color-sand);
+    color: var(--color-coal);
+}
+
+/* Voz do RANÇO: a provocação entra devagar, sem chamar mais atenção que a informação. */
+.ranco-voz {
+    animation: ranco-voz-entrada 0.2s ease-out;
+}
+
+@keyframes ranco-voz-entrada {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ranco-voz {
+        animation: none;
+    }
+}
+
+/* O HTML permanece completo: somente o JS liga o estado transitorio. */
+.revelacao [data-trofeu] figure { max-width: 14rem; }
+.revelacao [data-pular] { display: none; }
+.revelacao-em-curso [data-pular] { display: inline-flex; align-items: center; }
+.revelacao-em-curso [data-rever] { visibility: hidden; }
+.revelacao-em-curso .revelacao-aguardando { opacity: 0; transform: translateY(12px); }
+.revelacao-em-curso .revelacao-entrada { animation: revelacao-entrada .5s ease-out both; }
+.revelacao-em-curso [data-titulo-revelacao] { animation: revelacao-entrada .3s ease-out both; }
+.revelacao [data-frase] .ranco-voz { animation: none; }
+/* O título recebe o foco por código, ao fim da cena; não é um controle e não pede moldura. */
+.revelacao [data-titulo-revelacao]:focus { outline: none; }
+@keyframes revelacao-entrada {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .revelacao-em-curso .revelacao-aguardando,
+    .revelacao-em-curso .revelacao-entrada,
+    .revelacao-em-curso [data-titulo-revelacao] {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Pódio mobile: degraus e colunas da apresentação final. */
+@media (max-width: 767px) {
+    .podio-coluna { flex: 1; min-width: 0; max-width: 60%; }
+    .podio-trofeu { width: 4rem; height: auto; }
+    .podio-degrau { background-color: var(--color-sand); }
+    .podio-degrau-1 { height: 4rem; }
+    .podio-degrau-2 { height: 2.75rem; background-color: color-mix(in srgb, var(--color-sand) 80%, transparent); }
+    .podio-degrau-3 { height: 2rem; background-color: color-mix(in srgb, var(--color-sand) 60%, transparent); }
+}
+
+/* Menu mobile: navegação completa sem JavaScript; recolhida após inicializar Alpine. */
+[x-cloak] { display: none !important; }
+@media (max-width: 1023px) {
+    .ranco-navegacao:not([class~="hidden"]):not([class~="flex"]) { display: flex; }
+}

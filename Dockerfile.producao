@@ -1,0 +1,52 @@
+# Imagem de produção (pasta ranco-producao, docker-compose.producao.yml): código, dependências e
+# assets ficam dentro da imagem; só o storage é um volume; o .env chega como variáveis de ambiente.
+# O desenvolvimento continua no Dockerfile, com o código montado.
+FROM php:8.5-apache AS base
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl libzip-dev libicu-dev \
+    && docker-php-ext-install pdo_mysql zip intl bcmath pcntl \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dependências do PHP sem as de desenvolvimento. O post-autoload-dump publica os assets do Filament.
+FROM base AS dependencias
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git unzip \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+COPY . .
+# O storage fica fora do contexto (.dockerignore); o Laravel precisa da estrutura vazia.
+RUN mkdir -p storage/app/public storage/app/private storage/framework/cache/data \
+        storage/framework/sessions storage/framework/views storage/logs \
+    && composer dump-autoload --no-dev --optimize --no-interaction
+
+# Assets do Vite são gerados pelo producao.sh antes do build (docker run tem acesso à rede que o
+# docker build não tem neste servidor). O public/build compilado entra pelo contexto do build.
+FROM base
+
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY docker/producao/php.ini "$PHP_INI_DIR/conf.d/zz-ranco-producao.ini"
+
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && sed -ri 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+COPY docker/producao/apache.conf /etc/apache2/conf-available/zz-ranco.conf
+RUN a2enmod headers && a2dismod -f status && a2enconf zz-ranco
+
+WORKDIR /var/www/html
+COPY --from=dependencias /var/www/html ./
+COPY public/build ./public/build
+
+# O código fica com o root (só leitura para o Apache); o www-data escreve só no storage e nos caches.
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+COPY --chmod=0755 docker/producao/entrada.sh /usr/local/bin/entrada-ranco
+ENTRYPOINT ["entrada-ranco"]
+CMD ["apache2-foreground"]

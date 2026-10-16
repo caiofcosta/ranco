@@ -1,0 +1,794 @@
+/*
+ * Mesa de jogo da tela da mesa: tampo oval com 8 cadeiras em volta.
+ * Deitada quando há largura; em pé (3 cadeiras de cada lado) em telas estreitas.
+ * As posições vêm de áreas de grade nomeadas, não de pixels fixos.
+ */
+.mesa-de-jogo {
+    container-type: inline-size;
+}
+
+.mesa-de-jogo__palco {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 1.35fr)) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+        '. cima-esquerda cima-centro cima-direita .'
+        'esquerda mesa mesa mesa direita'
+        '. baixo-esquerda baixo-centro baixo-direita .';
+    align-items: center;
+    justify-items: center;
+    max-width: 60rem;
+    margin-inline: auto;
+}
+
+.mesa-de-jogo__tampo {
+    grid-area: mesa;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 15rem;
+    margin-block: -0.75rem;
+    padding: 2.5rem 3.5rem;
+    border: 1.15rem solid #191918;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 38%, rgb(255 255 255 / 0.05), transparent 45%),
+        #242423;
+    color: var(--color-cream);
+    text-align: center;
+    box-shadow:
+        inset 0 0 0 0.35rem #121212,
+        inset 0 0 0 0.6rem var(--color-coral),
+        inset 0 -1.2rem 1.6rem rgb(0 0 0 / 0.3),
+        0 1.1rem 2.6rem rgb(32 32 31 / 0.28);
+}
+
+.mesa-de-jogo__marca {
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.4em;
+}
+
+.mesa-de-jogo__marca span {
+    color: var(--color-coral);
+}
+
+.cadeira {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    width: 6.5rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Cadeira clicável do admin (remover participante): some os estilos nativos do <button>. */
+button.cadeira {
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+}
+button.cadeira:focus-visible { outline: 2px solid var(--color-cream); outline-offset: 3px; border-radius: 0.5rem; }
+
+.cadeira[data-posicao='cima-esquerda'] { grid-area: cima-esquerda; }
+.cadeira[data-posicao='cima-centro'] { grid-area: cima-centro; }
+.cadeira[data-posicao='cima-direita'] { grid-area: cima-direita; }
+.cadeira[data-posicao='esquerda'] { grid-area: esquerda; }
+.cadeira[data-posicao='direita'] { grid-area: direita; }
+.cadeira[data-posicao='baixo-esquerda'] { grid-area: baixo-esquerda; }
+.cadeira[data-posicao='baixo-centro'] { grid-area: baixo-centro; }
+.cadeira[data-posicao='baixo-direita'] { grid-area: baixo-direita; }
+
+.cadeira__encosto {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 5.75rem;
+    height: 4.4rem;
+    border-radius: 1.6rem 1.6rem 1.3rem 1.3rem;
+    background: linear-gradient(180deg, #4a4948, #1e1e1d 42%, #0d0d0d);
+    box-shadow:
+        0 0.45rem 1.1rem rgb(0 0 0 / 0.3),
+        inset 0 0.12rem 0.3rem rgb(255 255 255 / 0.14),
+        inset 0 -0.3rem 0.6rem rgb(0 0 0 / 0.55);
+}
+
+.cadeira__encosto::before,
+.cadeira__encosto::after {
+    content: '';
+    position: absolute;
+    top: 1.1rem;
+    width: 0.95rem;
+    height: 2.6rem;
+    border-radius: 0.8rem;
+    background: linear-gradient(180deg, #555250, #171717);
+}
+
+.cadeira__encosto::before { left: -0.55rem; }
+.cadeira__encosto::after { right: -0.55rem; }
+
+.cadeira__assento {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    background: var(--color-cream);
+    color: var(--color-coal);
+    font-size: 0.95rem;
+    font-weight: 900;
+    box-shadow: 0 0.35rem 0.75rem rgb(0 0 0 / 0.2);
+    transition: box-shadow 0.25s ease;
+}
+
+.cadeira__nome {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 0.2rem 0.65rem;
+    border-radius: 0.55rem;
+    background: var(--color-coal);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Admin: selo no canto do encosto, legível sobre o fundo claro e sobre o tampo. */
+.cadeira__coroa {
+    position: absolute;
+    top: -0.5rem;
+    left: 0;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 50%;
+    background: var(--color-coal);
+    color: var(--color-coral);
+    font-size: 0.85rem;
+    line-height: 1;
+    box-shadow: 0 0 0 0.15rem var(--color-cream);
+}
+
+.cadeira__marca {
+    position: absolute;
+    top: -0.55rem;
+    right: -0.9rem;
+    z-index: 3;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--color-coral);
+    color: var(--color-coal);
+    font-size: 0.6rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.cadeira__selo {
+    color: var(--color-muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+/* Quem olha: cadeira cor de ferrugem e assento coral. */
+.cadeira[data-tipo='voce'] .cadeira__encosto {
+    background: linear-gradient(180deg, #7a2d24, #451b18 45%, #2b1210);
+}
+
+.cadeira[data-tipo='voce'] .cadeira__assento {
+    background: var(--color-coral);
+}
+
+/* Lugar vazio: "+" leve; sem link, é só enfeite. */
+.cadeira[data-tipo='vaga'] .cadeira__assento {
+    font-size: 1.6rem;
+    font-weight: 300;
+}
+
+div.cadeira[data-tipo='vaga'] {
+    opacity: 0.55;
+}
+
+/* Convite pendente: assento tracejado, à espera. */
+.cadeira[data-tipo='convite'] .cadeira__assento {
+    border: 2px dashed var(--color-cream);
+    background: transparent;
+    color: var(--color-cream);
+}
+
+.cadeira[data-tipo='convite'] {
+    opacity: 0.75;
+}
+
+/* Online agora (presença em tempo real). */
+.cadeira[data-online] .cadeira__assento {
+    box-shadow:
+        0 0 0 0.2rem var(--color-coral),
+        0 0 0.9rem 0.15rem rgb(255 104 77 / 0.55);
+}
+
+a.cadeira {
+    border-radius: 1rem;
+}
+
+a.cadeira:hover .cadeira__assento {
+    box-shadow: 0 0 0 0.2rem var(--color-coal), 0 0.35rem 0.75rem rgb(0 0 0 / 0.2);
+}
+
+a.cadeira:focus-visible {
+    outline: 2px solid var(--color-coal);
+    outline-offset: 4px;
+}
+
+/* Em pé: a mesa fica alta e as cadeiras vão para as laterais. */
+@container (max-width: 40rem) {
+    .mesa-de-jogo__palco {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto repeat(3, auto) auto;
+        grid-template-areas:
+            '. cima-centro .'
+            'cima-esquerda mesa cima-direita'
+            'esquerda mesa direita'
+            'baixo-esquerda mesa baixo-direita'
+            '. baixo-centro .';
+        row-gap: 0.4rem;
+    }
+
+    .mesa-de-jogo__tampo {
+        align-self: stretch;
+        min-height: 20rem;
+        margin-block: 0;
+        margin-inline: -0.6rem;
+        padding: 2rem 1.25rem;
+        border-width: 0.8rem;
+    }
+
+    .cadeira {
+        width: 4.6rem;
+    }
+
+    .cadeira__encosto {
+        width: 4.3rem;
+        height: 3.5rem;
+    }
+
+    .cadeira__assento {
+        width: 2.75rem;
+        height: 2.75rem;
+        font-size: 0.82rem;
+    }
+
+    .cadeira__marca {
+        right: -0.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cadeira__assento {
+        transition: none;
+    }
+}
+
+/* Chamada suave apenas quando iniciar está disponível; texto e posição ficam estáveis. */
+.mesa-play:not(:disabled) {
+    cursor: pointer;
+    animation: mesa-play-halo 2.8s ease-out infinite;
+}
+
+.mesa-play:not(:disabled):hover,
+.mesa-play:not(:disabled):focus-visible {
+    animation: none;
+    box-shadow: 0 0 0 4px rgb(255 104 77 / 0.28), 0 0 20px rgb(255 104 77 / 0.3);
+}
+
+@keyframes mesa-play-halo {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(255 104 77 / 0), 0 0 10px rgb(255 104 77 / 0.12); }
+    20% { box-shadow: 0 0 0 2px rgb(255 104 77 / 0.3), 0 0 16px rgb(255 104 77 / 0.22); }
+    75% { box-shadow: 0 0 0 12px rgb(255 104 77 / 0), 0 0 10px rgb(255 104 77 / 0.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mesa-play:not(:disabled) {
+        animation: none;
+        box-shadow: 0 0 0 3px rgb(255 104 77 / 0.25);
+    }
+}
+
+/* Menos lugares: tampo compacto e cadeiras próximas, preservando a área central. */
+.mesa-de-jogo:is([data-lugares='2'], [data-lugares='3'], [data-lugares='4']) .mesa-de-jogo__palco {
+    max-width: 44rem;
+}
+.mesa-de-jogo:is([data-lugares='5'], [data-lugares='6']) .mesa-de-jogo__palco {
+    max-width: 52rem;
+}
+@container (min-width: 40.01rem) {
+    .mesa-de-jogo:is([data-lugares='2'], [data-lugares='3'], [data-lugares='4']) .mesa-de-jogo__tampo {
+        padding-inline: 2rem;
+        min-height: 17rem;
+    }
+    .mesa-de-jogo:is([data-lugares='2'], [data-lugares='3'], [data-lugares='4']) .cadeira__encosto {
+        width: 6rem;
+        height: 4.7rem;
+    }
+}
+@container (max-width: 40rem) {
+    .mesa-de-jogo[data-lugares='2'] .mesa-de-jogo__palco {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: 'cima-centro' 'mesa' 'baixo-centro';
+        grid-template-rows: auto auto auto;
+        max-width: 23rem;
+    }
+    .mesa-de-jogo[data-lugares='3'] .mesa-de-jogo__palco {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: 'cima-esquerda cima-direita' 'mesa mesa' 'baixo-centro baixo-centro';
+        grid-template-rows: auto auto auto;
+        max-width: 23rem;
+    }
+    .mesa-de-jogo[data-lugares='4'] .mesa-de-jogo__palco {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: 'cima-centro direita' 'mesa mesa' 'esquerda baixo-centro';
+        grid-template-rows: auto auto auto;
+        max-width: 25rem;
+    }
+    .mesa-de-jogo:is([data-lugares='2'], [data-lugares='3'], [data-lugares='4']) .mesa-de-jogo__tampo {
+        min-height: 17rem;
+        margin-inline: 0;
+        padding-inline: 0.75rem;
+    }
+}
+
+/* Desktop: aproveita melhor o espaço disponível com mesa maior e cadeiras mais espaçadas. */
+@media (min-width: 768px) {
+    .mesa-de-jogo__palco {
+        max-width: 80rem;
+        grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1.5fr)) minmax(0, 1.5fr);
+    }
+
+    .mesa-de-jogo__tampo {
+        min-height: 20rem;
+        padding: 3rem 4.5rem;
+    }
+
+    .cadeira {
+        width: 7.5rem;
+    }
+
+    .cadeira__encosto {
+        width: 6.5rem;
+        height: 5rem;
+    }
+
+    .cadeira__assento {
+        width: 4rem;
+        height: 4rem;
+        font-size: 1.1rem;
+    }
+
+    .cadeira__nome {
+        font-size: 0.75rem;
+    }
+}
+
+/* Atalhos compactos: as listas abrem em dialogs sem alterar a altura do palco. */
+.mesa-area { container-type: inline-size; }
+.mesa-area__conteudo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 2rem;
+}
+.mesa-area__conteudo > .mesa-de-jogo { min-width: 0; }
+
+.mesa-area__atalhos { display: flex; gap: 0.75rem; }
+.mesa-area__atalho {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid rgb(32 32 31 / 0.18);
+    border-radius: 0.85rem;
+    background: var(--color-cream);
+    color: var(--color-coal);
+    cursor: pointer;
+    transition: background-color 150ms, border-color 150ms;
+}
+.mesa-area__atalho:hover { background: var(--color-coral); border-color: var(--color-coral); }
+.mesa-area__atalho:focus-visible { outline: 2px solid var(--color-coal); outline-offset: 3px; }
+@container (min-width: 48rem) {
+    .mesa-area__atalhos { flex-direction: column; }
+}
+
+/*
+ * Celular: a tela da mesa ocupa a altura útil (o layout em tela cheia usa 100dvh). O card cresce
+ * até o rodapé e as linhas das cadeiras laterais dividem a altura que sobrar. Sem altura, a página
+ * rola: nada é cortado nem reduzido por escala.
+ */
+.mesa-tela__rodape:empty { display: none; }
+
+@media (width < 48rem) {
+    .mesa-tela { display: flex; flex: 1 0 auto; flex-direction: column; }
+    .mesa-tela > .mesa-area { display: flex; flex: 1 0 auto; flex-direction: column; }
+    .mesa-area__conteudo { display: flex; flex: 1 0 auto; flex-direction: column; align-items: stretch; gap: 0; }
+    .mesa-area__conteudo > .mesa-de-jogo { display: flex; flex: 1 0 auto; flex-direction: column; padding-top: 0.5rem; }
+    .mesa-de-jogo__palco { flex: 1 0 auto; width: 100%; }
+
+    @container (max-width: 40rem) {
+        /*
+         * Em pé: o tampo avança sob as cadeiras (nas laterais, para ganhar largura; nas cabeceiras,
+         * para não exigir altura à toa). As cadeiras só baixam quando a altura não comporta as
+         * cinco fileiras (abaixo de uns 600px de tela).
+         */
+        .mesa-de-jogo { --altura-encosto: clamp(2.75rem, calc(20dvh - 4rem), 3.5rem); }
+        .mesa-de-jogo__palco { grid-template-rows: auto repeat(3, minmax(0, 1fr)) auto; row-gap: 0.25rem; }
+        .mesa-de-jogo:is([data-lugares='2'], [data-lugares='3'], [data-lugares='4']) .mesa-de-jogo__palco {
+            grid-template-rows: auto minmax(0, 1fr) auto;
+        }
+        .mesa-de-jogo__tampo {
+            justify-self: stretch;
+            width: auto;
+            min-height: 15rem;
+            margin-block: -1rem;
+            margin-inline: -0.75rem;
+            padding: 1.5rem clamp(0.5rem, 5cqi - 0.5rem, 1.25rem);
+        }
+        /* Com poucos lugares o tampo ocupa a linha sozinho: mais estreito, para não virar círculo. */
+        .mesa-de-jogo:is([data-lugares='2'], [data-lugares='3'], [data-lugares='4']) .mesa-de-jogo__tampo {
+            justify-self: center;
+            width: 85%;
+        }
+        .cadeira__encosto { height: var(--altura-encosto); }
+        .cadeira__encosto::before,
+        .cadeira__encosto::after { height: calc(var(--altura-encosto) - 0.9rem); }
+        .cadeira__assento {
+            width: calc(var(--altura-encosto) - 0.75rem);
+            height: calc(var(--altura-encosto) - 0.75rem);
+        }
+        .cadeira__nome { padding-block: 0.15rem; line-height: 1.3; }
+        .mesa-de-jogo__marca { letter-spacing: 0.3em; }
+    }
+}
+
+/*
+ * Classificação da mesa, no rodapé do celular (o espaço que era da barra inferior). Fica em fluxo,
+ * no fim da coluna, sem position: fixed — assim nunca cobre as cadeiras. A área da mesa cresce e
+ * empurra o placar para baixo; respeita a área segura inferior do aparelho.
+ */
+@media (width < 48rem) {
+    .mesa-tela__rodape { flex-shrink: 0; margin-top: 0.5rem; }
+
+    .mesa-placar {
+        padding: 0.5rem 0.625rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        border-radius: 1.1rem;
+        border: 1px solid color-mix(in srgb, var(--color-coal) 12%, transparent);
+        background: color-mix(in srgb, var(--color-sand), var(--color-coal) 6%);
+    }
+
+    .mesa-placar__cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .mesa-placar__titulo { font-size: 0.75rem; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
+    .mesa-placar__auxiliar { font-size: 0.625rem; color: var(--color-muted); }
+
+    .mesa-placar__historico {
+        display: inline-flex; align-items: center; gap: 0.35rem; flex-shrink: 0;
+        min-height: 2.25rem; padding: 0 0.7rem;
+        border-radius: 999px; border: 1px solid color-mix(in srgb, var(--color-coal) 20%, transparent);
+        background: #fff; color: var(--color-coal); font-size: 0.75rem; font-weight: 700;
+    }
+    .mesa-placar__historico:focus-visible { outline: 2px solid var(--color-coal); outline-offset: 2px; }
+
+    /* Até quatro colunas por linha; com oito, duas linhas. Sem rolagem horizontal. */
+    .mesa-placar__grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.25rem 0.375rem; margin: 0; padding: 0; list-style: none; }
+    .mesa-placar__grade[data-lugares='1'] { grid-template-columns: minmax(0, 1fr); }
+    .mesa-placar__grade[data-lugares='2'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mesa-placar__grade[data-lugares='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .mesa-placar__item {
+        display: flex; flex-direction: column; align-items: center; gap: 0.05rem; min-width: 0;
+        padding: 0.3rem 0.15rem; border-radius: 0.6rem; text-align: center;
+    }
+    .mesa-placar__item--lider { background: color-mix(in srgb, var(--color-coral) 18%, transparent); }
+    .mesa-placar__posicao { font-size: 0.6875rem; font-weight: 900; color: var(--color-muted); line-height: 1; }
+    .mesa-placar__item--lider .mesa-placar__posicao { color: color-mix(in srgb, var(--color-coral), var(--color-coal) 35%); }
+    .mesa-placar__nome { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.75rem; font-weight: 700; line-height: 1.2; }
+    .mesa-placar__pontos { font-size: 0.875rem; font-weight: 900; line-height: 1.1; }
+
+    .mesa-placar__aviso { margin-top: 0.4rem; font-size: 0.6875rem; color: var(--color-muted); text-align: center; }
+}
+
+/*
+ * Navegação da mesa no celular: painel "Preparar mesa" (admin) e linha de ações. Fica em fluxo,
+ * sem position fixa, compacto, sem aumentar a altura dos controles além do necessário.
+ */
+.mesa-preparar {
+    margin: 0.25rem 0 0.5rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-coal) 15%, transparent);
+    background: color-mix(in srgb, var(--color-sand), var(--color-coal) 8%);
+    overflow: hidden;
+}
+
+.mesa-preparar__cabecalho {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--color-coal);
+}
+.mesa-preparar__cabecalho:focus-visible { outline: 2px solid var(--color-coal); outline-offset: -2px; }
+
+.mesa-preparar__painel { padding: 0 0.6rem 0.6rem; }
+.mesa-preparar__dica { padding: 0 0.3rem 0.5rem; font-size: 0.8125rem; font-weight: 700; color: var(--color-coal); }
+
+.mesa-preparar__itens {
+    list-style: none; margin: 0; padding: 0;
+    border-radius: 0.8rem; overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-coal) 10%, transparent);
+    background: #fff;
+}
+.mesa-preparar__itens > li + li { border-top: 1px solid color-mix(in srgb, var(--color-coal) 10%, transparent); }
+
+.mesa-preparar__item {
+    display: flex; align-items: center; gap: 0.75rem;
+    width: 100%; min-height: 3.25rem; padding: 0.55rem 0.8rem;
+    text-align: left; color: var(--color-coal);
+}
+.mesa-preparar__item:hover { background: color-mix(in srgb, var(--color-coal) 5%, transparent); }
+.mesa-preparar__item:focus-visible { outline: 2px solid var(--color-coal); outline-offset: -2px; }
+
+.mesa-acoes { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+.mesa-acoes__finalizar {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    min-height: 2.75rem; padding: 0.35rem 0.9rem;
+    border-radius: 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-coral) 55%, transparent);
+    background: color-mix(in srgb, var(--color-coral) 16%, transparent);
+    color: var(--color-coal);
+}
+.mesa-acoes__finalizar:focus-visible { outline: 2px solid var(--color-coal); outline-offset: 2px; }
+
+.mesa-acoes__secundario {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    min-height: 2.75rem; padding: 0 0.9rem;
+    border-radius: 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-coal) 20%, transparent);
+    background: #fff; color: var(--color-coal);
+    font-size: 0.8125rem; font-weight: 700;
+}
+.mesa-acoes__secundario:focus-visible { outline: 2px solid var(--color-coal); outline-offset: 2px; }
+
+/* ── Painel lateral desktop ──────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+    .mesa-area__conteudo {
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 1.5rem;
+    }
+
+    /* Grade 2×2 (Lugares, Pessoas) + itens largura total (Jogo, Mesa) */
+    .mesa-painel-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+    }
+
+    .mesa-painel-card--wide { grid-column: 1 / -1; }
+
+    /* Card base: forma, sombra, borda interna tracejada */
+    .mesa-painel-card {
+        position: relative;
+        border-radius: 18px 5px 18px 5px;
+        padding: 15px 16px;
+        box-shadow: 0 3px 10px rgba(32, 32, 31, 0.10), 0 1px 3px rgba(32, 32, 31, 0.07);
+        overflow: hidden;
+        text-align: left;
+        border: 0;
+        font: inherit;
+        display: block;
+        width: 100%;
+        text-decoration: none;
+    }
+
+    .mesa-painel-card::after {
+        content: '';
+        position: absolute;
+        inset: 6px;
+        border: 1.5px dashed currentColor;
+        opacity: 0.18;
+        border-radius: 13px 3px 13px 3px;
+        pointer-events: none;
+    }
+
+    /* Hover e foco apenas em elementos interativos */
+    button.mesa-painel-card,
+    a.mesa-painel-card {
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button.mesa-painel-card:hover,
+    a.mesa-painel-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(32, 32, 31, 0.15);
+    }
+
+    button.mesa-painel-card:active,
+    a.mesa-painel-card:active { transform: scale(0.97); }
+
+    button.mesa-painel-card:focus-visible,
+    a.mesa-painel-card:focus-visible {
+        outline: 2px solid var(--color-coal);
+        outline-offset: 2px;
+    }
+
+    /* Variantes de cor */
+    .mesa-painel-card--sand  { background-color: var(--color-sand);  color: var(--color-coal); }
+    .mesa-painel-card--coral { background-color: var(--color-coral); color: var(--color-coal); }
+    .mesa-painel-card--coal  { background-color: var(--color-coal);  color: var(--color-cream); }
+
+    /* Tipografia interna do card */
+    .mesa-painel-card__rotulo {
+        font-size: 0.58rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 5px;
+    }
+
+    .mesa-painel-card__valor {
+        font-size: 0.9rem;
+        font-weight: 900;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        margin-bottom: 7px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        word-break: break-word;
+    }
+
+    .mesa-painel-card__acao {
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        background: rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+        padding: 3px 10px;
+    }
+
+    .mesa-painel-card--coal .mesa-painel-card__acao {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Placar lateral */
+    .mesa-painel-placar {
+        border-radius: 16px 5px 16px 5px;
+        background: color-mix(in srgb, var(--color-sand), var(--color-coal) 6%);
+        border: 1px solid color-mix(in srgb, var(--color-coal) 12%, transparent);
+        padding: 12px 14px;
+        overflow-y: auto;
+        max-height: 60vh;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-sand) transparent;
+    }
+
+    .mesa-painel-placar__cabecalho {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 8px;
+    }
+
+    .mesa-painel-placar__titulo {
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-coal);
+        margin-bottom: 1px;
+    }
+
+    .mesa-painel-placar__auxiliar {
+        font-size: 0.57rem;
+        color: var(--color-muted);
+    }
+
+    .mesa-painel-placar__historico {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex-shrink: 0;
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--color-coal) 20%, transparent);
+        background: #fff;
+        color: var(--color-coal);
+        font-size: 0.6rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.15s;
+    }
+
+    .mesa-painel-placar__historico:hover { background: var(--color-sand); }
+    .mesa-painel-placar__historico:focus-visible { outline: 2px solid var(--color-coal); outline-offset: 2px; }
+
+    .mesa-painel-placar__lista {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .mesa-painel-placar__item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    .mesa-painel-placar__item--lider {
+        background: color-mix(in srgb, var(--color-coral) 18%, transparent);
+    }
+
+    .mesa-painel-placar__posicao {
+        font-size: 0.62rem;
+        font-weight: 900;
+        color: var(--color-muted);
+        width: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .mesa-painel-placar__item--lider .mesa-painel-placar__posicao {
+        color: color-mix(in srgb, var(--color-coral), var(--color-coal) 35%);
+    }
+
+    .mesa-painel-placar__nome {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mesa-painel-placar__pontos {
+        font-size: 0.78rem;
+        font-weight: 900;
+        flex-shrink: 0;
+    }
+
+    .mesa-painel-placar__vazio {
+        font-size: 0.72rem;
+        color: var(--color-muted);
+        text-align: center;
+        padding: 8px 0;
+    }
+}

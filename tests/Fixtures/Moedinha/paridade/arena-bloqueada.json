@@ -1,0 +1,67 @@
+{
+  "descricao": "Após uma remoção, uma arena mínima 56×56 bloqueia a reposição; a mesma arena vazia depois a aceita.",
+  "configuracao": {
+    "alvoDeMoedas": 2,
+    "chanceNegativa": 0.2,
+    "chanceMoeda2": 0.22,
+    "chanceMoeda3": 0.08,
+    "penalidade": -1
+  },
+  "semente": 42,
+  "trilha": [
+    {
+      "op": "preencher",
+      "ativos": [],
+      "largura": 400,
+      "altura": 400,
+      "tempoDecorrido": 0,
+      "criadas": [
+        {
+          "tipo": "moeda1",
+          "vida": 1279,
+          "x": 15.733250887133183,
+          "y": 47.39332879660651
+        },
+        {
+          "tipo": "moeda1",
+          "vida": 1209,
+          "x": 42.50853495905176,
+          "y": 22.493136080447584
+        }
+      ]
+    },
+    {
+      "op": "registrarRemocao",
+      "tempoDecorrido": 0
+    },
+    {
+      "op": "preencher",
+      "ativos": [
+        {
+          "tipo": "moeda3",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "largura": 56,
+      "altura": 56,
+      "tempoDecorrido": 300,
+      "criadas": []
+    },
+    {
+      "op": "preencher",
+      "ativos": [],
+      "largura": 56,
+      "altura": 56,
+      "tempoDecorrido": 301,
+      "criadas": [
+        {
+          "tipo": "moeda2",
+          "vida": 1398,
+          "x": 14.223409071564674,
+          "y": 8.040003066084214
+        }
+      ]
+    }
+  ]
+}

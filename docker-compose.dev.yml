@@ -1,0 +1,32 @@
+# Desenvolvimento nesta pasta, isolado da produção: projeto Docker, banco e volume próprios, e o
+# ambiente é sobrescrito aqui (variáveis do processo vencem o .env, que é o da produção).
+x-ambiente-dev: &ambiente-dev
+  APP_ENV: local
+  APP_DEBUG: "true"
+  APP_URL: http://localhost:${PORTA_APP:-8080}
+  GOOGLE_REDIRECT_URI: http://localhost:${PORTA_APP:-8080}/auth/google/callback
+  DB_HOST: db
+  DB_PORT: "3306"
+  DB_DATABASE: ranco
+  DB_USERNAME: ranco
+  DB_PASSWORD: ranco
+  SESSION_SECURE_COOKIE: "false"
+  TRUSTED_PROXIES: ""
+  MAIL_MAILER: log
+  LOG_CHANNEL: single
+  LOG_LEVEL: debug
+  REVERB_HOST: reverb
+  REVERB_ALLOWED_ORIGINS: "*"
+  VITE_REVERB_HOST: localhost
+  # Chave pública do Reverb para o navegador (a mesma do servidor). O segredo nunca entra no frontend.
+  VITE_REVERB_APP_KEY: ${REVERB_APP_KEY}
+  VITE_REVERB_PORT: ${PORTA_REVERB:-8081}
+  VITE_REVERB_SCHEME: http
+
+services:
+  app:
+    environment: *ambiente-dev
+  reverb:
+    environment: *ambiente-dev
+  agendador:
+    environment: *ambiente-dev

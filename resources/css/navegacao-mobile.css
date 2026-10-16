@@ -1,0 +1,56 @@
+.mobile-bottom-nav { display: none; }
+@media (width < 64rem) {
+    .mobile-jogo-card { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 16px; padding: 20px; border-top: 4px solid var(--color-coral); }
+    .mobile-jogo-logo { width: 48px; min-height: 0; padding: 0; background: transparent; }
+    .mobile-jogo-logo > span { display: none; }
+    .mobile-jogo-logo img { width: 48px; height: 48px; }
+    .mobile-jogo-texto { padding: 0; }
+    .mobile-jogo-texto h2 { font-size: 1.25rem; }
+
+    .mobile-tom > span { width: 56px; height: 56px; }
+    .mobile-area:not([data-mobile-area="inicio"]) .ranco-voz { display: none; }
+    .mobile-status-amigos > div button, .mobile-status-amigos > span { color: var(--color-coal); }
+    .ranco-conteudo { padding-top: 1.5rem; padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+    .mobile-bottom-nav { position: fixed; z-index: 40; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 8px max(8px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); border-top: 1px solid #20201f1a; background: #f7f3ec; box-shadow: 0 -4px 20px #20201f06; }
+    .mobile-nav-item { position: relative; display: flex; min-height: 58px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 2px; border-radius: 14px; color: #706a62; }
+    .mobile-nav-rotulo { font-size: 11px; font-weight: 700; line-height: 1.1; text-align: center; text-wrap: balance; }
+    .mobile-nav-item[aria-current="page"] { background: #ff684d26; color: #20201f; }
+    .mobile-nav-item[aria-current="page"] svg { stroke: #a33621; }
+    /* Indicador coral do item ativo. */
+    .mobile-nav-item[aria-current="page"]::after { content: ""; position: absolute; bottom: 3px; left: 50%; width: 16px; height: 3px; transform: translateX(-50%); border-radius: 3px; background: #ff684d; }
+    .mobile-nav-item:focus-visible { outline: 2px solid #20201f; outline-offset: 2px; }
+    .mobile-nav-badge { position: absolute; top: -5px; left: 18px; display: grid; min-width: 18px; height: 18px; place-items: center; border-radius: 9px; padding: 0 4px; background: #ff684d; color: #20201f; font-size: 10px; font-weight: 900; }
+}
+
+/* Tela cheia (a mesa): topo compacto com voltar, marca e menu; sem a barra inferior. */
+@media (width < 64rem) {
+    .ranco-topo--tela-cheia { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; padding: calc(2px + env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) 2px max(8px, env(safe-area-inset-left, 0px)); }
+    .ranco-conteudo--tela-cheia { padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); }
+    .mobile-menu-botao { position: relative; display: grid; width: 44px; height: 44px; place-items: center; border-radius: 12px; color: #f7f3ec; }
+    .mobile-menu-botao:hover, .mobile-menu-botao[aria-expanded="true"] { background: #ffffff14; }
+    .mobile-menu-botao:focus-visible { outline: 2px solid #ff684d; outline-offset: 2px; }
+    .mobile-menu-botao .mobile-nav-badge { top: 2px; left: auto; right: 0; }
+    .mobile-menu { position: absolute; z-index: 50; top: calc(100% + 6px); right: 0; display: grid; width: min(15rem, calc(100vw - 16px)); gap: 2px; padding: 6px; border: 1px solid #20201f1a; border-radius: 18px; background: #f7f3ec; box-shadow: 0 12px 32px #20201f33; }
+    .mobile-menu .mobile-nav-item { min-height: 48px; flex-direction: row; justify-content: flex-start; gap: 12px; padding: 0 12px; color: #20201f; font-size: 14px; }
+}
+@media (width < 48rem) {
+    .ranco-conteudo--tela-cheia { display: flex; flex: 1 0 auto; flex-direction: column; padding: 8px max(8px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+}
+
+/* Atalhos sociais da Home mobile: dois botões orgânicos, texturizados, com arte. */
+.mobile-social { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mobile-social-botao { position: relative; display: flex; min-height: 204px; flex-direction: column; overflow: hidden; padding: 16px; border-radius: 26px; transition: transform .12s ease, box-shadow .12s ease; }
+.mobile-social-botao--grafite { background-color: #20201f; color: #f7f3ec; background-image: radial-gradient(circle at 82% 12%, #ff684d40, transparent 46%), radial-gradient(circle at 8% 92%, #f7f3ec14, transparent 42%); }
+.mobile-social-botao--coral { background-color: #ff684d; color: #20201f; background-image: radial-gradient(circle at 16% 18%, #20201f1f, transparent 46%), radial-gradient(circle at 92% 88%, #f7f3ec40, transparent 42%); }
+.mobile-social-botao:active { transform: translateY(3px) scale(.985); }
+.mobile-social-botao:focus-visible { outline: 2px solid #20201f; outline-offset: 3px; }
+.mobile-social-titulo { max-width: 8ch; font-size: 1.05rem; font-weight: 900; line-height: 1.05; letter-spacing: -.02em; }
+.mobile-social-seta { position: absolute; top: 13px; right: 13px; display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: #ffffff1f; }
+.mobile-social-botao--coral .mobile-social-seta { background: #20201f14; }
+.mobile-social-seta svg { width: 15px; height: 15px; }
+.mobile-social-arte { width: 100%; max-width: 128px; margin: 10px auto 0; aspect-ratio: 1 / 1; object-fit: contain; }
+.mobile-social-texto { margin-top: auto; padding-top: 10px; font-size: .72rem; font-weight: 600; line-height: 1.25; opacity: .88; }
+@media (prefers-reduced-motion: reduce) {
+    .mobile-social-botao { transition: none; }
+    .mobile-social-botao:active { transform: none; }
+}

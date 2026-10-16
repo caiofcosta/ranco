@@ -1,0 +1,256 @@
+{
+  "descricao": "Grade de pares (sorteioNegativa, sorteioValor) e o tipo escolhido.",
+  "dificuldade": "medio",
+  "casos": [
+    {
+      "sorteioNegativa": 0,
+      "sorteioValor": 0,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.37,
+      "sorteioValor": 0.53,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.74,
+      "sorteioValor": 0.06,
+      "tipo": "moeda3"
+    },
+    {
+      "sorteioNegativa": 0.11,
+      "sorteioValor": 0.59,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.48,
+      "sorteioValor": 0.12,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.85,
+      "sorteioValor": 0.65,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.22,
+      "sorteioValor": 0.18,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.59,
+      "sorteioValor": 0.71,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.96,
+      "sorteioValor": 0.24,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.33,
+      "sorteioValor": 0.77,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.7,
+      "sorteioValor": 0.3,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.07,
+      "sorteioValor": 0.83,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.44,
+      "sorteioValor": 0.36,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.81,
+      "sorteioValor": 0.89,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.18,
+      "sorteioValor": 0.42,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.55,
+      "sorteioValor": 0.95,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.92,
+      "sorteioValor": 0.48,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.29,
+      "sorteioValor": 0.01,
+      "tipo": "moeda3"
+    },
+    {
+      "sorteioNegativa": 0.66,
+      "sorteioValor": 0.54,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.03,
+      "sorteioValor": 0.07,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.4,
+      "sorteioValor": 0.6,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.77,
+      "sorteioValor": 0.13,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.14,
+      "sorteioValor": 0.66,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.51,
+      "sorteioValor": 0.19,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.88,
+      "sorteioValor": 0.72,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.25,
+      "sorteioValor": 0.25,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.62,
+      "sorteioValor": 0.78,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.99,
+      "sorteioValor": 0.31,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.36,
+      "sorteioValor": 0.84,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.73,
+      "sorteioValor": 0.37,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.1,
+      "sorteioValor": 0.9,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.47,
+      "sorteioValor": 0.43,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.84,
+      "sorteioValor": 0.96,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.21,
+      "sorteioValor": 0.49,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.58,
+      "sorteioValor": 0.02,
+      "tipo": "moeda3"
+    },
+    {
+      "sorteioNegativa": 0.95,
+      "sorteioValor": 0.55,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.32,
+      "sorteioValor": 0.08,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.69,
+      "sorteioValor": 0.61,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.06,
+      "sorteioValor": 0.14,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.43,
+      "sorteioValor": 0.67,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.8,
+      "sorteioValor": 0.2,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.17,
+      "sorteioValor": 0.73,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.54,
+      "sorteioValor": 0.26,
+      "tipo": "moeda2"
+    },
+    {
+      "sorteioNegativa": 0.91,
+      "sorteioValor": 0.79,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.28,
+      "sorteioValor": 0.32,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.65,
+      "sorteioValor": 0.85,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.02,
+      "sorteioValor": 0.38,
+      "tipo": "negativa"
+    },
+    {
+      "sorteioNegativa": 0.39,
+      "sorteioValor": 0.91,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.76,
+      "sorteioValor": 0.44,
+      "tipo": "moeda1"
+    },
+    {
+      "sorteioNegativa": 0.13,
+      "sorteioValor": 0.97,
+      "tipo": "negativa"
+    }
+  ]
+}

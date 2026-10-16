@@ -1,0 +1,77 @@
+# Cada cópia do projeto (pasta) é um projeto Docker próprio; PORTA_* no .env evita conflito.
+services:
+  app:
+    build:
+      context: .
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "${PORTA_APP:-8080}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 18
+      start_period: 20s
+
+  db:
+    image: mariadb:11
+    ports:
+      - "127.0.0.1:${PORTA_BANCO:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ranco
+      MYSQL_DATABASE: ranco
+      MYSQL_USER: ranco
+      MYSQL_PASSWORD: ranco
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      # Cria o banco de testes (ranco_testes) quando o volume é novo.
+      - ./docker/mariadb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  reverb:
+    build:
+      context: .
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    command: php artisan reverb:start --host=0.0.0.0 --port=8081
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "127.0.0.1:${PORTA_REVERB:-8081}:8081"
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Roda as tarefas de routes/console.php (prazos das partidas e limpeza do solo).
+  # Na hospedagem, o mesmo papel é de um cron chamando `php artisan schedule:run` a cada minuto.
+  agendador:
+    build:
+      context: .
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    command: php artisan schedule:work
+    user: www-data
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:

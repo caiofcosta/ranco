@@ -1,0 +1,23 @@
+# Contexto das imagens Docker. A imagem de desenvolvimento não copia o código (ele é montado);
+# a de produção (Dockerfile.producao) copia, e não pode levar .env, dependências do host nem caches.
+.git
+.env
+.env.*
+node_modules
+vendor
+public/hot
+public/storage
+public/css/filament
+public/js/filament
+public/fonts/filament
+public/fonts-manifest.dev.json
+storage
+bootstrap/cache/*.php
+tests
+.phpunit.cache
+.idea
+.vscode
+Dockerfile*
+docker-compose*.yml
+dev.sh
+producao.sh

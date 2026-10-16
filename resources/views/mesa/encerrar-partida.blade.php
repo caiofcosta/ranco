@@ -1,0 +1,21 @@
+<x-layouts::app title="Encerrar partida">
+    <div class="max-w-lg">
+        <h1 class="text-2xl font-black tracking-[-0.04em]">Encerrar a partida</h1>
+        <x-aviso class="mt-6">Encerrar agora termina a partida sem vencedor.</x-aviso>
+
+        <form method="POST" action="{{ route('mesas.partida.encerrar', $id) }}" class="mt-8 space-y-4">
+            @csrf
+            <button
+                type="submit"
+                class="h-14 w-full rounded-xl bg-danger text-sm font-black uppercase tracking-[.08em] text-cream transition hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coal"
+                data-test="confirmar-encerrar-partida"
+            >
+                Encerrar partida
+            </button>
+        </form>
+
+        <p class="mt-6">
+            <x-link :href="route('mesas.mostrar', $id)" discreto>Voltar</x-link>
+        </p>
+    </div>
+</x-layouts::app>

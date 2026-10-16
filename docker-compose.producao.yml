@@ -1,0 +1,124 @@
+# Produção do RANÇO, usada só na pasta ranco-producao e operada pelo ./producao.sh.
+# O código vem da imagem (Dockerfile.producao). Nenhuma porta é publicada no PC: a única entrada
+# é o túnel do Cloudflare, que fala com o app e o Reverb pela rede interna.
+# Todos os serviços voltam sozinhos (restart unless-stopped), inclusive depois de reiniciar o PC.
+name: ranco-producao
+
+x-logs: &logs
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+x-laravel: &laravel
+  image: ranco-producao-laravel:atual
+  # O Compose lê o .env como o usuário do host e entrega as variáveis; o arquivo pode ficar 600.
+  env_file: .env
+  volumes:
+    - armazenamento:/var/www/html/storage
+  restart: unless-stopped
+  logging: *logs
+
+services:
+  app:
+    <<: *laravel
+    build:
+      context: .
+      dockerfile: Dockerfile.producao
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  reverb:
+    <<: *laravel
+    user: www-data
+    command: php artisan reverb:start --host=0.0.0.0 --port=8081
+    depends_on:
+      app:
+        condition: service_healthy
+
+  fila:
+    <<: *laravel
+    user: www-data
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # Prazos das partidas (a cada minuto) e limpeza das jogadas solo abandonadas.
+  agendador:
+    <<: *laravel
+    user: www-data
+    command: php artisan schedule:work
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # Coleta contínua das métricas do Laravel Pulse (dashboard em /pulse, só para o administrador do
+  # sistema). Grava no mesmo banco; sem porta publicada. O nome fixo evita que cada recriação do
+  # container apareça como um servidor novo no dashboard.
+  pulse:
+    <<: *laravel
+    user: www-data
+    command: php artisan pulse:check
+    environment:
+      PULSE_SERVER_NAME: ranco-producao
+    depends_on:
+      app:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11.8
+    ports:
+      - "127.0.0.1:33400:3306"
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:?defina DB_DATABASE no .env}
+      MARIADB_USER: ${DB_USERNAME:?defina DB_USERNAME no .env}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?defina DB_ROOT_PASSWORD no .env}
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - banco:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+    logging: *logs
+
+  # Túnel nomeado do Cloudflare. Só entra com CLOUDFLARE_TUNNEL_TOKEN no .env (o producao.sh liga
+  # o perfil). O IP fixo é o valor de TRUSTED_PROXIES: só ele pode informar HTTPS e IP do visitante.
+  tunel:
+    image: cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    profiles: [tunel]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      app:
+        condition: service_healthy
+      reverb:
+        condition: service_started
+    networks:
+      default:
+        ipv4_address: 172.30.50.10
+    restart: unless-stopped
+    logging: *logs
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.50.0/24
+
+volumes:
+  banco:
+  armazenamento:

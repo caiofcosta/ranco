@@ -1,0 +1,185 @@
+.labirinto-painel { display: flex; flex-direction: column; min-width: 0; }
+@media (max-width: 639px) {
+    .labirinto-painel [data-area-tabuleiro], .labirinto-painel > [data-tabuleiro] { order: -1; margin-bottom: 1rem; }
+    body:has(.labirinto-painel) header.sticky { display: none; }
+}
+
+[data-preparacao][hidden] { display: none; }
+
+.labirinto-controle { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0 10px; flex-shrink: 0; }
+.labirinto-controle p { margin: 0; font-size: 12px; color: #69665f; text-align: center; }
+.labirinto-joystick { position: relative; isolation: isolate; width: 148px; height: 148px; border-radius: 50%; background: radial-gradient(ellipse at 50% 62%, #d9d0c0 0%, #ece5d9 50%, #f1ebe1 71%); border: 1px solid #d8cebe; box-shadow: inset 0 1px 1px #fff9, 0 2px 3px #20201f08; touch-action: none; user-select: none; cursor: grab; }
+.labirinto-joystick::before { content: ''; position: absolute; width: 92px; height: 60px; left: calc(50% - 46px); top: 56px; border-radius: 50%; background: radial-gradient(ellipse, #242726 0 20%, #444743 22% 35%, #62645b 37% 41%, #343833 43% 56%, #8c8b7c 58% 62%, #b5ae9d 64%); box-shadow: 0 5px 0 #b0a795, 0 8px 10px #20201f25, inset 0 2px 3px #20201f50; }
+.labirinto-joystick.ativo { cursor: grabbing; border-color: #ff684d99; }
+.labirinto-haste { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.labirinto-haste line { stroke-linecap: round; }
+.labirinto-haste-sombra { stroke: #20201f; stroke-width: 15; }
+.labirinto-haste-metal { stroke: #999c94; stroke-width: 10; }
+.labirinto-haste-luz { stroke: #e5e5d9; stroke-width: 3; }
+.labirinto-alavanca { position: absolute; width: 52px; height: 52px; left: calc(50% - 26px); top: calc(50% - 45px); pointer-events: none; }
+.labirinto-manopla { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(ellipse at 29% 19%, #fff8e9 0%, #ffd9bd 5%, #ff9976 15%, transparent 36%), radial-gradient(ellipse at 72% 85%, #ffc785 0%, #ff7847 9%, transparent 30%), radial-gradient(circle at 40% 32%, #ff956e 0%, #ff6038 39%, #b42b17 66%, #581a15 84%, #f89269 98%); border: 1px solid #813023; box-shadow: inset 1px 1px 2px #fff8dacc, inset -2px -3px 4px #54130b80, 0 1px 1px #3f211b, 4px 9px 9px #20201f30; }
+.labirinto-manopla::before { content: ''; position: absolute; left: 9px; top: 6px; width: 25px; height: 14px; border-radius: 65% 45% 60% 40%; background: linear-gradient(155deg, #fffef7f5 0%, #fff7e7bb 35%, #ffe9cc15 80%); transform: rotate(-27deg); box-shadow: 0 -1px 1px #fff9; }
+.labirinto-manopla::after { content: ''; position: absolute; right: 5px; bottom: 7px; width: 16px; height: 22px; border-radius: 50%; border-right: 2px solid #ffe3b9bf; transform: rotate(35deg); filter: blur(.3px); }
+.labirinto-seta { position: absolute; color: #8b8170; font: bold 18px/1 sans-serif; pointer-events: none; }
+.labirinto-seta.cima { top: 10px; left: calc(50% - 6px); }
+.labirinto-seta.baixo { bottom: 10px; left: calc(50% - 6px); }
+.labirinto-seta.esquerda { left: 10px; top: calc(50% - 9px); }
+.labirinto-seta.direita { right: 10px; top: calc(50% - 9px); }
+@media (max-width: 639px) {
+    .labirinto-painel > .labirinto-controle { order: -1; }
+    .labirinto-painel [data-area-tabuleiro], .labirinto-painel > [data-tabuleiro] { margin-bottom: 0; }
+}
+
+/* Placar compacto: oculto por padrão; visível apenas no jogo imersivo (regra abaixo) */
+[data-placar-compacto] { display: none; }
+
+/* == Mobile imersivo: labirinto ocupa toda a altura útil da tela (<48rem) ============== */
+@media (width < 48rem) {
+    /* Joystick compacto para caber em telas menores (ex.: 320 px) */
+    .labirinto-joystick { width: 128px; height: 128px; }
+
+    /* Grid de 2 linhas: jogo preenche a linha 1 (1fr), placar ancora na linha 2 (auto).
+       O espaço excedente em telas altas fica entre o jogo e o placar — dentro da linha 1.
+       flex-grow: 1 mantém o grid preenchendo o ranco-conteudo--tela-cheia (flex pai). */
+    body:has([data-labirinto-partida]) [data-tela-do-jogo],
+    body:has([data-labirinto-assistir]) [data-tela-do-jogo] {
+        flex-grow: 1;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        grid-template-columns: 1fr;
+        gap: 0;
+        max-width: 100%;
+    }
+    body:has([data-labirinto-partida]) [data-tela-do-jogo] > main,
+    body:has([data-labirinto-assistir]) [data-tela-do-jogo] > main {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+    }
+    [data-labirinto-partida],
+    [data-labirinto-assistir] {
+        flex-grow: 1;
+        min-height: 0;
+        max-width: 100%;
+    }
+
+    /* Header de prazo: oculto visualmente; dados permanecem no DOM para o JS de prazo */
+    body:has([data-labirinto-partida]) [data-prazo-da-jogada],
+    body:has([data-labirinto-assistir]) [data-prazo-da-jogada] { display: none; }
+
+    /* Aside: compacto no estilo mesa-placar; esconde detalhes, mostra só o resumo do placar */
+    body:has([data-labirinto-partida]) [data-tempo-real-mesa] > aside,
+    body:has([data-labirinto-assistir]) [data-tempo-real-mesa] > aside {
+        flex-shrink: 0;
+        padding: 0.5rem 0.625rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        border-radius: 1.1rem;
+        border: 1px solid color-mix(in srgb, var(--color-coal) 12%, transparent);
+        background: color-mix(in srgb, var(--color-sand), var(--color-coal) 6%);
+    }
+    body:has([data-labirinto-partida]) [data-tempo-real-mesa] > aside > *,
+    body:has([data-labirinto-assistir]) [data-tempo-real-mesa] > aside > * { display: none; }
+    body:has([data-labirinto-partida]) [data-tempo-real-mesa] > aside > [data-placar-compacto],
+    body:has([data-labirinto-assistir]) [data-tempo-real-mesa] > aside > [data-placar-compacto] { display: block; }
+    body:has([data-labirinto-partida]) [data-tempo-real-mesa] > aside > [data-placar-labirinto],
+    body:has([data-labirinto-assistir]) [data-tempo-real-mesa] > aside > [data-placar-labirinto] { display: flex; }
+
+    /* Cabeçalho compacto: nome da mesa e rodada ocultos; jogador e info em linha fina */
+    [data-labirinto-nome-mesa] { display: none; }
+    [data-labirinto-rodada] { display: none; }
+    [data-labirinto-nome-jogador] {
+        margin-bottom: 2px;
+        font-size: 0.75rem;
+        line-height: 1.3;
+    }
+    [data-labirinto-info] {
+        margin-top: 0;
+        margin-bottom: 6px;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+    [data-labirinto-info] h1 { font-size: 1rem; margin-top: 2px; }
+    [data-labirinto-info] .text-2xl { font-size: 1.2rem; }
+    [data-labirinto-info] .text-xs { font-size: 0.65rem; }
+
+    /* Instruções: aria-label do canvas descreve a ação; texto removido para ganhar espaço */
+    #instrucoes-da-vez { display: none; }
+    /* Aviso de envio: sem margem no mobile (espaçamento gerido pelo justify-content:center do pai) */
+    [data-labirinto-partida] [data-aviso] { margin-top: 0; }
+
+    /* Área do tabuleiro: empilha tabuleiro e joystick.
+       Reseta order:-1 e margin-bottom:1rem vindos do bloco max-width:639px. */
+    [data-labirinto-partida] [data-area-tabuleiro],
+    [data-labirinto-assistir] [data-area-tabuleiro] {
+        order: 0;
+        margin-bottom: 0;
+    }
+    [data-area-tabuleiro] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Tabuleiro: menor entre a largura disponível e a altura disponível menos o overhead fixo */
+    [data-area-tabuleiro] [data-tabuleiro] {
+        width: min(100%, calc(100dvh - 23rem));
+        margin-inline: auto;
+    }
+}
+
+/* == Painel inferior da partida: placar com barras, tempos da rodada e histórico =========== */
+.lab-placar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-coal) 12%, transparent);
+}
+
+.lab-placar__cabecalho { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.lab-placar__titulo { font-size: 1.125rem; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
+.lab-placar__subtitulo { margin-top: 0.1rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-muted); }
+.lab-placar__selo {
+    flex-shrink: 0; align-self: flex-start;
+    padding: 0.25rem 0.6rem; border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-coal) 18%, transparent);
+    background: #fff; font-size: 0.7rem; font-weight: 800;
+}
+
+.lab-placar__lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.lab-placar__linha { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.lab-placar__nome { min-width: 0; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-placar__pts { flex-shrink: 0; font-weight: 900; }
+.lab-barra { margin-top: 0.3rem; height: 0.5rem; border-radius: 999px; background: color-mix(in srgb, var(--color-coal) 10%, transparent); overflow: hidden; }
+.lab-barra__nivel { height: 100%; border-radius: inherit; background: var(--color-coral); transition: width 0.3s ease; }
+
+.lab-secao { display: flex; flex-direction: column; gap: 0.4rem; }
+.lab-secao__titulo { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-muted); }
+
+.lab-tempos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.lab-tempos__item { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; padding: 0.35rem 0; }
+.lab-tempos__item + .lab-tempos__item { border-top: 1px solid color-mix(in srgb, var(--color-coal) 8%, transparent); }
+.lab-tempos__nome { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-tempos__nome--vez { color: var(--color-coral); }
+.lab-tempos__valor { flex-shrink: 0; color: var(--color-muted); font-weight: 700; }
+
+.lab-historico { display: flex; flex-direction: column; gap: 0.4rem; }
+.lab-rodada { border-radius: 0.75rem; border: 1px solid color-mix(in srgb, var(--color-coal) 10%, transparent); background: #fff; overflow: hidden; }
+.lab-rodada__resumo { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 2.5rem; padding: 0 0.75rem; cursor: pointer; list-style: none; font-size: 0.8rem; }
+.lab-rodada__resumo::-webkit-details-marker { display: none; }
+.lab-rodada__resumo:focus-visible { outline: 2px solid var(--color-coal); outline-offset: 2px; }
+.lab-rodada__id { font-weight: 800; }
+.lab-rodada__ganhador { color: color-mix(in srgb, var(--color-coral), var(--color-coal) 25%); font-weight: 800; text-align: right; }
+.lab-rodada__tempos { list-style: none; margin: 0; padding: 0 0.75rem 0.6rem; display: flex; flex-direction: column; }
+.lab-rodada__tempo { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; padding: 0.25rem 0; font-size: 0.8rem; }
+.lab-rodada__tempo + .lab-rodada__tempo { border-top: 1px solid color-mix(in srgb, var(--color-coal) 8%, transparent); }
+.lab-rodada__nome { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* No mobile imersivo, o próprio aside já é o cartão; o painel fica sem borda/padding extra. */
+@media (width < 48rem) {
+    body:has([data-labirinto-partida]) .lab-placar,
+    body:has([data-labirinto-assistir]) .lab-placar { gap: 0.6rem; padding: 0; border: 0; }
+    body:has([data-labirinto-partida]) .lab-placar__titulo,
+    body:has([data-labirinto-assistir]) .lab-placar__titulo { font-size: 1rem; }
+}
