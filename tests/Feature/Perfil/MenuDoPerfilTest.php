@@ -30,7 +30,10 @@ final class MenuDoPerfilTest extends TestCase
         $this->assertStringContainsString('Medalhas e troféus', $item->textContent);
         $this->assertTrue($item->hasAttribute('wire:navigate'));
         $this->assertFalse($item->hasAttribute('aria-current'));
-        $this->assertSame('M', trim($item->getElementsByTagName('span')->item(0)->textContent));
+        // O menu lateral passou a usar ícones (Flux) no lugar da inicial: o primeiro quadradinho traz o ícone.
+        $quadradinho = $item->getElementsByTagName('span')->item(0);
+        $this->assertInstanceOf(DOMElement::class, $quadradinho);
+        $this->assertGreaterThanOrEqual(1, $quadradinho->getElementsByTagName('svg')->length);
     }
 
     #[Test]
