@@ -14,7 +14,7 @@ O **RANÇO** é uma aplicação web de jogos sociais. Participantes criam mesas,
 
 ### Partida e acompanhamento
 
-![Tela do jogo Labirinto](docs/evidencias/tela-do-jogo-final.png)
+![Partida do Labirinto em mesa, com classificação dos participantes](docs/evidencias/tela-do-jogo-375.png)
 
 As imagens estão incluídas no próprio repositório. A execução local não depende de um site externo.
 
